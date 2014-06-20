@@ -2,7 +2,6 @@ from email.utils import parsedate
 import poplib
 import email
 import bisect
-import itertools
 import os
 import subprocess
 
@@ -24,7 +23,7 @@ def _login(conn, service, username, password):
     conn.pass_(password)
 
 def _retrieveAttachments(conn, start_date, end_date, file_type):
-    for message in _MessagesByDate(conn, start_date, end_date):
+    for message in _messagesByDate(conn, start_date, end_date):
         for attachment in _attachmentsByFileType(message, file_type):
             yield attachment
 
@@ -36,7 +35,7 @@ def _attachmentsByFileType(message, file_type):
 def _getMessage(conn, index):
     return email.message_from_string("\n".join(conn.retr(index)[1]))
 
-def  _MessagesByDate(conn, start_date, end_date):
+def  _messagesByDate(conn, start_date, end_date):
     newest_index = len(conn.list()[1])
 
     class Message_Date(object):

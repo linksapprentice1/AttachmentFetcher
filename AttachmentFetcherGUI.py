@@ -1,7 +1,7 @@
+from datetime import datetime
 import Tkinter as tk
 import AttachmentFetcher
 import calendar
-from datetime import datetime
 
 class GUI(tk.Tk):
     def __init__(self):
@@ -47,14 +47,14 @@ class GUI(tk.Tk):
             button.bind("<Button-1>", onclick)
 
     def dateIsValid(self, date):
-        month, day, year = self.date_values(date)
+        month, day, year = self.dateValues(date)
         return self.matchMonth(month) and day.isdigit() and year.isdigit()
         
     def datesAreValid(self):
         return self.dateIsValid(self.start_date) and self.dateIsValid(self.end_date)
 
     def dateObject(self, date):
-        month, day, year = self.date_values(date)
+        month, day, year = self.dateValues(date)
         return datetime.strptime(self.matchMonth(month) + " " + day + " " + year, '%b %d %Y').timetuple()
 
     def matchMonth(self, attempt):
@@ -62,7 +62,7 @@ class GUI(tk.Tk):
             if month.startswith(attempt) or attempt == index:
                 return calendar.month_abbr[index]
 
-    def date_values(self, date):
+    def dateValues(self, date):
         return [x.get() for x in date]
 
     def values(self):
