@@ -1,14 +1,16 @@
 from datetime import datetime
 import Tkinter as tk
-import AttachmentFetcher
+import ttk
 import calendar
+import threading
+import AttachmentFetcher
 
 class GUI(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
 
-        self.title("Attachment Catcher")
-        self.geometry("300x500")
+        self.title("Attachment Fetcher")
+        self.geometry("300x510")
 
         self.service = self.optionMenu("Select email service: ", self.services())
         self.username = self.input("Username: ")
@@ -19,10 +21,10 @@ class GUI(tk.Tk):
         self.button("Get files", self.getFiles)
 
     def services(self):
-        return ["yahoo", "gmail", "aol", "hotmail"]
+        return ["yahoo", "gmail", "aol", "live"]
 
     def fileTypes(self):
-        return ["jpeg", "doc", "gif", "pdf"]
+        return ["jpeg", "gif", "png", "txt", "html", "pdf"]
 
     def optionMenu(self, text, options):
         tk.Label(self.master, text = text).pack()
@@ -59,20 +61,32 @@ class GUI(tk.Tk):
 
     def matchMonth(self, attempt):
         for index, month in enumerate(calendar.month_name):
-            if month.startswith(attempt) or attempt == index:
+            if month.startswith(attempt) or attempt == str(index):
                 return calendar.month_abbr[index]
 
     def dateValues(self, date):
-        return [x.get() for x in date]
+        return [val.get() for val in date]
 
     def values(self):
         return self.service.get(), self.username.get(), self.password.get(), \
                self.dateObject(self.start_date), self.dateObject(self.end_date), \
                self.file_type.get()
+
+    def startProgressBar(self):
+        progress_bar = ttk.Progressbar(self.master, orient=tk.HORIZONTAL, mode='indeterminate')
+        progress_bar.start()
+        progress_bar.pack()
+        return progress_bar
+
+    def getAttachments(self, progress_bar = None):
+        AttachmentFetcher.getAttachments(*self.values())
+        if progress_bar:
+            progress_bar.stop()
    
     def getFiles(self, event):
         if self.datesAreValid():
-            AttachmentFetcher.getAttachments(*self.values())
+            progress_bar = self.startProgressBar()
+            threading.Thread(target = self.getAttachments, args = (progress_bar, )).start()
         else:
             print "Invalid date entry! Correct example: April 12 1998"
 

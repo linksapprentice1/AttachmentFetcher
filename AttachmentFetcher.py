@@ -1,6 +1,7 @@
 from email.utils import parsedate
 import poplib
 import email
+import mimetypes
 import bisect
 import os
 import subprocess
@@ -14,9 +15,9 @@ def getAttachments(service, username, password, start_date, end_date, file_type)
 
 def _connect(service):
     try:
-        return poplib.POP3_SSL('pop.' + service + '.com', '995')
+        return poplib.POP3_SSL('pop.' + service + '.com', 995)
     except:
-        return poplib.POP3_SSL('pop.mail.' + service + '.com', '995')
+        return poplib.POP3_SSL('pop.mail.' + service + '.com', 995)
 
 def _login(conn, service, username, password):
     conn.user(username)
@@ -27,9 +28,16 @@ def _retrieveAttachments(conn, start_date, end_date, file_type):
         for attachment in _attachmentsByFileType(message, file_type):
             yield attachment
 
+def _fileTypeMatches(data, file_type):
+    filename, content_type = data.get_filename(), data.get_content_type() 
+    extensions = mimetypes.guess_all_extensions(content_type, strict = False)
+    return (content_type and file_type in content_type.lower()) or \
+       (filename and file_type in filename.lower()) or \
+       any(file_type in extension.lower() for extension in extensions)  
+
 def _attachmentsByFileType(message, file_type):
     for data in message.walk():
-        if file_type in data.get_content_type():
+        if _fileTypeMatches(data, file_type):
             yield data
 
 def _getMessage(conn, index):
