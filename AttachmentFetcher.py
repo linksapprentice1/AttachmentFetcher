@@ -74,7 +74,7 @@ def _saveAttachments(attachments):
     print "Done"
 
 def _openDir(dir_name):
-    _mkdir("Attachments")
+    _mkdir(dir_name)
     subprocess.Popen(["explorer" if os.name == "nt" else "nautilus", dir_name])
     
     
